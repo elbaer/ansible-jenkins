@@ -1,0 +1,19 @@
+[local]
+localhost ansible_connection=local
+
+[master]
+jenkinsmaster ansible_host=192.168.36.10
+
+[docker]
+dockerslave ansible_host=192.168.36.11
+
+[java]
+javaslave ansible_host=192.168.36.12
+
+[slave:children]
+docker
+java
+
+[remote:children]
+slave
+master

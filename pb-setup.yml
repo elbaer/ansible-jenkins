@@ -1,0 +1,111 @@
+---
+- name: playbook for host setup
+  hosts: all
+  become: yes
+
+  vars:
+    ansible_user_name: ansible
+    epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+    epel_repo_gpg_key_url: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+    epel_repofile_path: "/etc/yum.repos.d/epel.repo"
+
+  tasks:
+    - name: install pip
+      dnf:
+        name:
+          - python
+          - libselinux-python
+        state: installed
+      when: ansible_pkg_mgr == 'dnf'
+
+    - block:
+      - name: 1.Check if EPEL repo is already configured.
+        stat: path={{ epel_repofile_path }}
+        register: epel_repofile_result
+
+      - name: 2.Install EPEL repo.
+        yum:
+          name: "{{ epel_repo_url }}"
+          state: present
+        register: result
+        when: not epel_repofile_result.stat.exists
+
+      - name: 3.Import EPEL GPG key.
+        rpm_key:
+          key: "{{ epel_repo_gpg_key_url }}"
+          state: present
+        when: not epel_repofile_result.stat.exists
+
+      - name: install pip
+        yum:
+          name:
+            - python2-pip
+          state: installed
+      when: ansible_pkg_mgr == 'yum'
+
+    - name: ensure ssh password authentication is ok
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: 'PasswordAuthentication '
+        line: 'PasswordAuthentication yes'
+      notify: restart sshd
+
+    - name: ensure passlib python lib is installed
+      pip: name=passlib
+      #delegate_to: 127.0.0.1
+
+    - name: hash password
+      shell: python -c "from passlib.hash import sha512_crypt; print sha512_crypt.encrypt('someweirdpassword')"
+      register: hashed_pw
+      #delegate_to: 127.0.0.1
+      changed_when: false
+
+    - name: install ansible user
+      user:
+        name: "{{ ansible_user_name }}"
+        state: present
+        shell: /bin/bash
+        password: "{{ hashed_pw.stdout }}"
+        groups: vagrant
+
+    - name: create sudo rules for ansible user
+      copy:
+        content: "{{ ansible_user_name }} ALL=(ALL:ALL) NOPASSWD:ALL"
+        dest: /etc/sudoers.d/10_{{ ansible_user_name }}
+        owner: root
+        group: root
+        mode: 0644
+
+    - block:
+      - name: enable public key authentication
+        lineinfile:
+            path: /etc/ssh/sshd_config
+            regexp: '^#PubkeyAuthentication'
+            line: 'PubkeyAuthentication yes'
+
+      - name: enable RSA authentication
+        lineinfile:
+            path: /etc/ssh/sshd_config
+            regexp: '^RSAAuthentication'
+            line: 'RSAAuthentication yes'
+            insertbefore: '^PubkeyAuthentication'
+        notify: restart sshd
+
+    - name: update etc hosts
+      blockinfile:
+        path: /etc/hosts
+        insertafter: EOF
+        content: |
+          jenkinsmaster 192.168.36.10
+          dockerslave   192.168.36.11
+          javaslave     192.168.36.12
+
+    - name: add ansible control node public key
+      authorized_key:
+        user: "{{ ansible_user_name }}"
+        state: present
+        key: "{{ lookup('file', 'ssh-keys/id_rsa.pub') }}"
+
+  handlers:
+    - name: restart sshd
+      service: name=sshd state=restarted

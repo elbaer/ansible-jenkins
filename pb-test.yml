@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    var1: "test1"
+    var2: "test2"
+    var3: "{{var1}}"
+    var4: "holunderblüten"
+  tasks:
+    - debug: var=var3
+    - set_fact:
+        var3: "{{var2}}"
+    - debug: var=var3
+    - debug: var=var4
+    - set_fact:
+        var3: "{{var1}}"
+        var2: "{{var4}}"
+    - debug: var=var3
+    - debug: var=var2
