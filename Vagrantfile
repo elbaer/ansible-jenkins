@@ -10,8 +10,10 @@ Vagrant.configure("2") do |config|
       nodeconfig.vm.box = node[:box]
       nodeconfig.vm.hostname = node[:hostname] + ".box"
       nodeconfig.vm.network :private_network, ip: node[:ip]
-
       nodeconfig.vm.provider :libvirt do |vb|
+        vb.memory = node[:ram] ? node[:ram] : 512;
+      end
+      nodeconfig.vm.provider :virtualbox do |vb|
         vb.memory = node[:ram] ? node[:ram] : 512;
       end
     end

@@ -19,23 +19,22 @@
         state: present
 
     - name: get ssh key for known host
-      shell: ssh-keyscan -t ecdsa-sha2-nistp256 "{{ ansible_hostname }}" | tail -1
-      register: known_host
+      shell: ssh-keyscan -t ecdsa-sha2-nistp256 jenkinsmaster | tail -1
+      register: known_host_jenkinsmaster
+
+    - name: get ssh key for known host
+      shell: ssh-keyscan -t ecdsa-sha2-nistp256 dockerslave | tail -1
+      register: known_host_dockerslave
+
+    - name: get ssh key for known host
+      shell: ssh-keyscan -t ecdsa-sha2-nistp256 javaslave | tail -1
+      register: known_host_javaslave
 
     - name: add know host to variable
       set_fact: 
-        ssh_key_jenkinsmaster: "{{ known_host.stdout }}"
-      when: ansible_hostname == "jenkinsmaster"
-
-    - name: add know host to variable
-      set_fact:
-        ssh_key_javaslave: "{{ known_host.stdout }}"
-      when: ansible_hostname == "javaslave"
-
-    - name: add know host to variable
-      set_fact:
-        ssh_key_dockerslave:  "{{ known_host.stdout }}"
-      when: ansible_hostname == "dockerslave"
+        ssh_key_jenkinsmaster: "{{ known_host_jenkinsmaster.stdout }}"
+        ssh_key_javaslave: "{{ known_host_dockerslave.stdout }}"
+        ssh_key_dockerslave:  "{{ known_host_javaslave.stdout }}"
 
     - name: add ansible control node public key
       authorized_key:

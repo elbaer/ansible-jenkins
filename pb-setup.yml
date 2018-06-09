@@ -96,9 +96,9 @@
         path: /etc/hosts
         insertafter: EOF
         content: |
-          jenkinsmaster 192.168.36.10
-          dockerslave   192.168.36.11
-          javaslave     192.168.36.12
+          192.168.36.10 jenkinsmaster
+          192.168.36.11 dockerslave
+          192.168.36.12 javaslave
 
     - name: add ansible control node public key
       authorized_key:
