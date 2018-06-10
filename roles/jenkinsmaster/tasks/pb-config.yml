@@ -1,0 +1,137 @@
+---
+
+- name: Disable Security for Installation
+  xml:
+    path: /var/lib/jenkins/config.xml
+    xpath: /hudson/useSecurity
+    value: 'false'
+
+- name: Restart Jenkins
+  service:
+    name: jenkins
+    state: restarted
+
+- wait_for:
+    host: localhost
+    port: 8080
+    delay: 15
+    state: started
+
+- name: Download jenkins Cli 
+  get_url:
+    url: http://192.168.36.10:8080/jnlpJars/jenkins-cli.jar
+    dest: /var/lib/jenkins/jenkins-cli.jar
+
+- name: Create User
+  #shell: echo 'jenkins.model.Jenkins.instance.securityRealm.createAccount("user1", "password123")' | java -jar /var/lib/jenkins/jenkins-cli.jar -s http://localhost:8080/ groovy =
+  shell: echo 'hpsr=new hudson.security.HudsonPrivateSecurityRealm(false); hpsr.createAccount("dummyuser", "dummypassword")' | java -jar /var/lib/jenkins/jenkins-cli.jar -s http://localhost:8080 groovy =
+  register: create_result
+
+- debug:
+    var: create_result
+
+- name: Install Jenkinsplugin
+  shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://localhost:8080/ install-plugin {{ item }}
+  loop:
+    - script-security
+    - junit
+    - matrix-project
+    - maven-plugin
+    - credentials
+    - ssh-credentials
+    - javadoc
+    - gitlab-plugin
+    - gitlab-oauth
+    - github-oauth
+    - gitlab-logo
+    - pipeline-multibranch-defaults
+    - blueocean
+    - build-pipeline-plugin
+    - openshift-client
+    - openshift-pipeline
+    - pipeline-github
+    - locale
+    #recommended Plugins by Jenkins
+    - cloudbees-folder
+    - timestamper
+    - build-pipeline-plugin
+    - workflow-aggregator
+    - github
+    - pam-auth
+
+    - antisamy-markup-formatter
+    - ws-cleanup
+    - github-branch-source
+    - subversion
+    - ldap
+
+    - ant
+    - build-timeout
+    - pipeline-github-lib
+    - ssh-slaves
+    - email-ext
+
+    - matrix-auth
+    - pipeline-stage-view
+    - gradle
+    - credentials-binding
+    - mailer
+
+- copy:
+    src: jenkins.model.JenkinsLocationConfiguration.xml
+    dest: /var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml
+    owner: jenkins
+    group: jenkins
+    mode: "u=rw,g=r,o=r"
+
+- name: Create root URL for Jenkins
+  xml:
+    path: /var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml
+    xpath: /jenkins.model.JenkinsLocationConfiguration/jenkinsUrl
+    value: 'http://{{ ansible_hostname }}:8080/'
+
+- name: change authorization strategy class
+  xml:
+    path: /var/lib/jenkins/config.xml
+    xpath: /hudson/authorizationStrategy
+    attribute: class
+    value: hudson.security.FullControlOnceLoggedInAuthorizationStrategy
+
+- name: add child to authorization strategy
+  xml:
+    path: /var/lib/jenkins/config.xml
+    xpath: /hudson/authorizationStrategy
+    add_children:
+    - denyAnonymousReadAccess: 'false'
+
+- name: change security realm class
+  xml:
+    path: /var/lib/jenkins/config.xml
+    xpath: /hudson/securityRealm
+    attribute: class
+    value: hudson.security.HudsonPrivateSecurityRealm
+
+- name: add children to security realm
+  xml:
+    path: /var/lib/jenkins/config.xml
+    xpath: /hudson/securityRealm
+    add_children:
+    - disableSignup: 'false'
+    - enableCaptcha: 'false'
+
+- name: Enable Security for Installation
+  xml:
+    path: /var/lib/jenkins/config.xml
+    xpath: /hudson/useSecurity
+    value: 'true'
+
+- name: Change install state name
+  xml:
+    path: /var/lib/jenkins/config.xml
+    xpath: /hudson/installStateName
+    value: 'RUNNING'
+
+- name: Restart Jenkins
+  service:
+    name: jenkins
+    state: restarted

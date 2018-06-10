@@ -1,0 +1,60 @@
+---
+
+- name: hash password
+  shell: python -c "from passlib.hash import sha512_crypt; print sha512_crypt.encrypt('jenkins')"
+  register: hashed_pw
+
+- name: Creating User
+  user:
+    name: "jenkins"
+    password: "{{ hashed_pw.stdout }}"
+    state: present
+
+- name: get ssh key for known host
+  shell: ssh-keyscan -t ecdsa-sha2-nistp256 jenkinsmaster | tail -1
+  register: known_host_jenkinsmaster
+
+- name: get ssh key for known host
+  shell: ssh-keyscan -t ecdsa-sha2-nistp256 dockerslave | tail -1
+  register: known_host_dockerslave
+
+- name: get ssh key for known host
+  shell: ssh-keyscan -t ecdsa-sha2-nistp256 javaslave | tail -1
+  register: known_host_javaslave
+
+- name: add know host to variable
+  set_fact: 
+    jenkinsmaster: "{{ known_host_jenkinsmaster.stdout }}"
+    javaslave: "{{ known_host_dockerslave.stdout }}"
+    dockerslave:  "{{ known_host_javaslave.stdout }}"
+
+- name: add ansible control node public key
+  authorized_key:
+    user: "jenkins"
+    state: present
+    key: "{{ lookup('file', 'ssh-keys/id_rsa.pub') }}"
+
+- name: Copy private key to .ssh
+  copy:
+    src: ssh-keys/id_rsa
+    dest: /home/jenkins/.ssh/
+    mode: 0600
+    owner: jenkins
+    group: jenkins
+
+- name: add all hosts to known_hosts
+  blockinfile:
+    path: /home/jenkins/.ssh/known_hosts
+    block: |
+      {{ jenkinsmaster }} 
+      {{ javaslave }}
+      {{ dockerslave }}
+    create: yes
+    mode: 0644
+    owner: jenkins
+    group: jenkins
+
+- name: restart sshd
+  service:
+    name: sshd
+    state: restarted

@@ -2,10 +2,6 @@
 - name: Create User Jenkins
   hosts: remote
   become: yes
-  vars:
-    ssh_key_jenkinsmaster: xxx
-    ssh_key_dockerslave: yyy
-    ssh_key_javaslave: zzz
 
   tasks:
     - name: hash password
@@ -32,9 +28,9 @@
 
     - name: add know host to variable
       set_fact: 
-        ssh_key_jenkinsmaster: "{{ known_host_jenkinsmaster.stdout }}"
-        ssh_key_javaslave: "{{ known_host_dockerslave.stdout }}"
-        ssh_key_dockerslave:  "{{ known_host_javaslave.stdout }}"
+        nodes.ssh_key_jenkinsmaster: "{{ known_host_jenkinsmaster.stdout }}"
+        nodes.ssh_key_javaslave: "{{ known_host_dockerslave.stdout }}"
+        nodes.ssh_key_dockerslave:  "{{ known_host_javaslave.stdout }}"
 
     - name: add ansible control node public key
       authorized_key:
@@ -54,9 +50,9 @@
       blockinfile:
         path: /home/jenkins/.ssh/known_hosts
         block: |
-          {{ ssh_key_jenkinsmaster }} 
-          {{ ssh_key_javaslave }}
-          {{ ssh_key_dockerslave }}
+          {{ nodes.ssh_key_jenkinsmaster }} 
+          {{ nodes.ssh_key_javaslave }}
+          {{ nodes.ssh_key_dockerslave }}
         create: yes
         mode: 0644
         owner: jenkins

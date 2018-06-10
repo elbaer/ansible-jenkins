@@ -27,14 +27,8 @@
       yum:
         name=jenkins
         state=present
-
-    - name: Disable Security for Installation
-      xml:
-        path: /var/lib/jenkins/config.xml
-        xpath: /hudson/useSecurity
-        value: 'false'
-
+    
     - name: Start Jenkins
       service:
         name: jenkins
-        state: restarted
+        state: started

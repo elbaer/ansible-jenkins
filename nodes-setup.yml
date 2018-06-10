@@ -1,0 +1,9 @@
+---
+
+- name: Nodes Setup
+  hosts: remote
+  remote_user: vagrant
+  become: yes
+
+  roles:
+    - nodes
