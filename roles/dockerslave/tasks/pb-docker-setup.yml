@@ -1,0 +1,30 @@
+---
+- name: create Docker Group
+  group:
+    name: docker
+
+- name: adding docker role to jenkins
+  user:
+    name: "{{ item }}"
+    groups: docker
+    append: yes
+  with_items:
+    - jenkins
+    - vagrant
+
+- name: upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+
+- name: install docker
+  package:
+    name: docker
+    state: present
+  notify: restart-docker-service
+
+- name: docker is started and enabled
+  service:
+    name: docker
+    state: started
+    enabled: yes

@@ -1,0 +1,8 @@
+---
+
+- name: Setup and Configure Dockerslave
+  hosts: docker
+  become: yes
+
+  roles:
+    - dockerslave
