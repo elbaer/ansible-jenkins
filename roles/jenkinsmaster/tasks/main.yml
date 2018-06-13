@@ -1,3 +1,4 @@
 ---
 - import_tasks: pb-setup.yml
 - import_tasks: pb-config.yml
+- import_tasks: pb-plugin-config.yml

@@ -18,3 +18,15 @@ to retry, use: --limit @/Users/Silversurfer/git-projects/ansible-jenkins/setup-j
 ```
 
 -> Einfach nochmal ausführen, scheint ein vorübergehender Fehler zu sein
+
+Link für Credentials
+<https://getintodevops.com/blog/how-to-add-jenkins-credentials-with-curl-or-ansible>
+
+## Tasks
+
+die Security ist noch nicht wieder aktiviert nach der Plugin installation.
+Eventuell kann man hier die einzelnen Playbooks noch verschieben.
+
+Der Username/Password werden noch nicht aus den Variablen gelesen.
+
+Vielleicht kann man die Replaces noch mit XML ersetzen.

@@ -1,7 +1,7 @@
 ---
 
 - name: Setup and Configure Jenkinsmaster
-  hosts: remote
+  hosts: jenkinsmaster
   become: yes
 
   roles:

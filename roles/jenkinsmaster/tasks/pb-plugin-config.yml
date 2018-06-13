@@ -1,0 +1,101 @@
+---
+
+- name: Disable Security for Installation
+  xml:
+    path: /var/lib/jenkins/config.xml
+    xpath: /hudson/useSecurity
+    value: 'false'
+
+- name: Restart Jenkins
+  service:
+    name: jenkins
+    state: restarted
+
+- wait_for:
+    host: localhost
+    port: 8080
+    delay: 15
+    state: started
+
+- copy:
+    src: locale.xml
+    dest: /var/lib/jenkins/locale.xml
+    owner: jenkins
+    group: jenkins
+    mode: "u=rw,g=r,o=r"
+
+- name: get locale-plugin version
+  shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 list-plugins locale | awk '{ print $4 }'
+  register: localeversion
+      
+- replace:
+    path: /var/lib/jenkins/locale.xml
+    regexp: '{version}'
+    replace: "{{ localeversion.stdout }}"
+
+- uri:
+    url: 'http://{{ jenkins.hostname }}:8080/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'
+    user: "{{ jenkins.username }}"
+    password: "{{ jenkins.password }}"
+    force_basic_auth: yes
+    return_content: yes
+  register: crumb
+
+- uri:
+    method: POST
+    url: 'http://{{ jenkins.hostname }}:8080/credentials/store/system/domain/_/createCredentials'
+    user: "{{ jenkins.username }}"
+    password: "{{ jenkins.password }}"
+    force_basic_auth: yes
+    status_code: 200,302
+    headers:
+      Jenkins-Crumb: "{{ crumb.content.split(':')[1] }}"
+    body: |
+      json={
+        "": "0",
+        "credentials": {
+          "scope": "GLOBAL",
+          "id": "{{ credentials.id }}",
+          "secret": "{{ credentials.secret }}",
+          "description": "Token provided for github",
+          "$class": "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl"
+        }
+      }
+
+- copy:
+    src: github-plugin-configuration.xml
+    dest: /var/lib/jenkins/github-plugin-configuration.xml
+    owner: jenkins
+    group: jenkins
+    mode: "u=rw,g=r,o=r"
+
+- name: get github-plugin version
+  shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 list-plugins github | awk '{ print $4 }'
+  register: githubversion
+    
+- replace:
+    path: /var/lib/jenkins/github-plugin-configuration.xml
+    regexp: '{version}'
+    replace: "{{ githubversion.stdout }}"
+
+- replace:
+    path: /var/lib/jenkins/github-plugin-configuration.xml
+    regexp: '{credentialsId}'
+    replace: "{{ credentials.id }}"
+
+- name: Enable Security for Installation
+  xml:
+    path: /var/lib/jenkins/config.xml
+    xpath: /hudson/useSecurity
+    value: 'true'
+
+- name: Restart Jenkins
+  service:
+    name: jenkins
+    state: restarted
+
+- wait_for:
+    host: localhost
+    port: 8080
+    delay: 15
+    state: started
