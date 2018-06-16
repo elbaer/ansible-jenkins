@@ -15,7 +15,8 @@
     url: https://pkg.jenkins.io/redhat-stable/jenkins.repo 
     dest: /etc/yum.repos.d/jenkins.repo
 
-- rpm_key:
+- name: check jenkins rpm key
+  rpm_key:
     state: present
     key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
 
@@ -29,8 +30,14 @@
     name: jenkins
     state: started
 
-- wait_for:
+- name: Wait for Jenkinsmaster to get back online
+  wait_for:
     host: localhost
     port: 8080
     delay: 20
     state: started
+
+- name: Download jenkins Cli 
+  get_url:
+    url: http://{{ jenkins.hostname }}:8080/jnlpJars/jenkins-cli.jar
+    dest: /var/lib/jenkins/jenkins-cli.jar

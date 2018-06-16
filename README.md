@@ -5,9 +5,14 @@
 Um die Jenkins Plugins richtig auszuwählen, musste ich wissen, wie die selbigen heissen. Der Link hier
 <https://updates.jenkins.io/download/plugins/> war extrem hilfreich. Die Pluginnamen entsprechen den Ordnernamen.
 
-## Start by ansible
+## Installation Guide
 
- `ansible-playbook --key-file "ssh-keys/id_rsa" nodes-setup.yml`
+```bash
+vagrant up
+ansible-playbook nodes-setup.yml
+ansible-playbook jenkinsmaster-setup.yml
+ansible-playbook dockerslave-setup.yml
+```
 
 ## bekannte Fehler
 
@@ -24,9 +29,5 @@ Link für Credentials
 
 ## Tasks
 
-die Security ist noch nicht wieder aktiviert nach der Plugin installation.
-Eventuell kann man hier die einzelnen Playbooks noch verschieben.
-
-Der Username/Password werden noch nicht aus den Variablen gelesen.
-
-Vielleicht kann man die Replaces noch mit XML ersetzen.
+Docker Slave hinzufügen... Eventuell gibt es eine Möglichkeit das Ganze via API zu konfigurieren
+<https://support.cloudbees.com/hc/en-us/articles/115003896171-Creating-node-with-Rest-API-and-ManuallyTrustedKeyVerificationStrategy>

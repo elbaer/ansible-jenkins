@@ -11,73 +11,22 @@
     name: jenkins
     state: restarted
 
-- wait_for:
+- name: Wait for Jenkinsmaster to get back online
+  wait_for:
     host: localhost
     port: 8080
-    delay: 15
+    delay: 20
     state: started
 
-- name: Download jenkins Cli 
-  get_url:
-    url: http://192.168.36.10:8080/jnlpJars/jenkins-cli.jar
-    dest: /var/lib/jenkins/jenkins-cli.jar
-
 - name: Create User
-  #shell: echo 'jenkins.model.Jenkins.instance.securityRealm.createAccount("user1", "password123")' | java -jar /var/lib/jenkins/jenkins-cli.jar -s http://localhost:8080/ groovy =
-  shell: echo 'hpsr=new hudson.security.HudsonPrivateSecurityRealm(false); hpsr.createAccount("dummyuser", "dummypassword")' | java -jar /var/lib/jenkins/jenkins-cli.jar -s http://localhost:8080 groovy =
+  shell: echo 'hpsr=new hudson.security.HudsonPrivateSecurityRealm(false); hpsr.createAccount("{{ jenkins.username }}", "{{ jenkins.password }}")' | java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 groovy =
   register: create_result
 
 - debug:
     var: create_result
 
-- name: Install Jenkinsplugin
-  shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://localhost:8080/ install-plugin {{ item }}
-  loop:
-    - script-security
-    - junit
-    - matrix-project
-    - maven-plugin
-    - credentials
-    - ssh-credentials
-    - javadoc
-    - gitlab-plugin
-    - gitlab-oauth
-    - github-oauth
-    - gitlab-logo
-    - pipeline-multibranch-defaults
-    - blueocean
-    - build-pipeline-plugin
-    - openshift-client
-    - openshift-pipeline
-    - pipeline-github
-    - locale
-    #recommended Plugins by Jenkins
-    - cloudbees-folder
-    - timestamper
-    - build-pipeline-plugin
-    - workflow-aggregator
-    - github
-    - pam-auth
-
-    - antisamy-markup-formatter
-    - ws-cleanup
-    - github-branch-source
-    - subversion
-    - ldap
-
-    - ant
-    - build-timeout
-    - pipeline-github-lib
-    - ssh-slaves
-    - email-ext
-
-    - matrix-auth
-    - pipeline-stage-view
-    - gradle
-    - credentials-binding
-    - mailer
-
-- copy:
+- name: Copy URL Configuration file
+  copy:
     src: jenkins.model.JenkinsLocationConfiguration.xml
     dest: /var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml
     owner: jenkins
@@ -88,7 +37,7 @@
   xml:
     path: /var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml
     xpath: /jenkins.model.JenkinsLocationConfiguration/jenkinsUrl
-    value: 'http://{{ ansible_hostname }}:8080/'
+    value: 'http://{{ jenkins.hostname }}:8080/'
 
 - name: change authorization strategy class
   xml:
@@ -119,12 +68,6 @@
     - disableSignup: 'false'
     - enableCaptcha: 'false'
 
-- name: Enable Security for Installation
-  xml:
-    path: /var/lib/jenkins/config.xml
-    xpath: /hudson/useSecurity
-    value: 'true'
-
 - name: Change install state name
   xml:
     path: /var/lib/jenkins/config.xml
@@ -135,3 +78,10 @@
   service:
     name: jenkins
     state: restarted
+
+- name: Wait for Jenkinsmaster to get back online
+  wait_for:
+    host: localhost
+    port: 8080
+    delay: 20
+    state: started

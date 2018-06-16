@@ -1,14 +1,85 @@
 nodes:
     ansible_user_name: ansible
+    ansible_user_password: someweirdpassword
     epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
     epel_repo_gpg_key_url: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
     epel_repofile_path: "/etc/yum.repos.d/epel.repo"
 
 jenkins:
     hostname: jenkinsmaster
+    slave1: dockerslave
+    slave2: javaslave
     username: dummyuser
     password: dummypassword
+    plugins:
+        - ant
+        - antisamy-markup-formatter
+        - blueocean
+        - build-pipeline-plugin
+        - build-timeout
+        - cloudbees-folder
+        - credentials
+        - credentials-binding
+        - docker-plugin
+        - email-ext
+        - github
+        - github-branch-source
+        - github-oauth
+        - gitlab-logo
+        - gitlab-plugin
+        - gitlab-oauth
+        - gradle
+        - job-dsl
+        - junit
+        - ldap
+        - locale
+        - mailer
+        - matrix-auth
+        - matrix-project
+        - maven-plugin
+        - pam-auth
+        - pipeline-aggregator-view
+        - pipeline-aws
+        - pipeline-bamboo
+        - pipeline-build-step
+        - pipeline-dependency-walker
+        - pipeline-deploymon
+        - pipeline-github-lib
+        - pipeline-github
+        - pipeline-githubnotify-step
+        - pipeline-graph-analysis
+        - pipeline-input-step
+        - pipeline-maven
+        - pipeline-milestone-step
+        - pipeline-model-api
+        - pipeline-model-declarative-agent
+        - pipeline-model-definition
+        - pipeline-model-extensions
+        - pipeline-multibranch-defaults
+        - pipeline-npm
+        - pipeline-rest-api
+        - pipeline-stage-step
+        - pipeline-stage-tags-metadata
+        - pipeline-stage-view
+        - pipeline-utility-steps
+        - openshift-client
+        - openshift-pipeline
+        - script-security
+        - ssh-slaves
+        - subversion
+        - ssh-credentials
+        - timestamper
+        - workflow-aggregator
+        - workflow-basic-steps
+        - workflow-multibranch
+        - ws-cleanup        
 
-credentials:
+github:
+    url: "https://www.github.com"
     id: github-access-token 
+    secret: *****
+
+gitlab:
+    url: "https://gitlab.puzzle.ch"
+    id: gitlab-access-token 
     secret: *****

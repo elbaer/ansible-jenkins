@@ -29,10 +29,4 @@ Vagrant.configure("2") do |config|
   end
   
   config.vm.provision :shell, inline: "yum -y -q install python java"
-
-  # Run Ansible from the Vagrant Host
-  config.vm.provision "ansible" do |ansible|
-    ansible.compatibility_mode = "2.0"
-    ansible.playbook = "nodes-setup.yml"
-  end
 end

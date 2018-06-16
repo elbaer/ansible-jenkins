@@ -1,23 +1,23 @@
 ---
 
-- name: Disable Security for Installation
-  xml:
-    path: /var/lib/jenkins/config.xml
-    xpath: /hudson/useSecurity
-    value: 'false'
-
+- name: Install Jenkinsplugin
+  shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080/ -auth {{ jenkins.username }}:{{ jenkins.password }} install-plugin {{ item }}
+  loop: "{{ jenkins.plugins }}"
+  
 - name: Restart Jenkins
   service:
     name: jenkins
     state: restarted
 
-- wait_for:
+- name: Wait for Jenkinsmaster to get back online
+  wait_for:
     host: localhost
     port: 8080
-    delay: 15
+    delay: 20
     state: started
 
-- copy:
+- name: Copy locale.xml to Jenkinsmaster
+  copy:
     src: locale.xml
     dest: /var/lib/jenkins/locale.xml
     owner: jenkins
@@ -25,15 +25,18 @@
     mode: "u=rw,g=r,o=r"
 
 - name: get locale-plugin version
-  shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 list-plugins locale | awk '{ print $4 }'
+  shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 -auth {{ jenkins.username }}:{{ jenkins.password }} list-plugins locale | awk '{ print $4 }'
   register: localeversion
-      
-- replace:
-    path: /var/lib/jenkins/locale.xml
-    regexp: '{version}'
-    replace: "{{ localeversion.stdout }}"
 
-- uri:
+- name: set locale plugin version
+  xml:
+    path: /var/lib/jenkins/locale.xml
+    xpath: /locale
+    attribute: plugin
+    value: locale@"{{ localeversion.stdout }}"
+
+- name: get Crumb for Jenkins API
+  uri:
     url: 'http://{{ jenkins.hostname }}:8080/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'
     user: "{{ jenkins.username }}"
     password: "{{ jenkins.password }}"
@@ -41,7 +44,8 @@
     return_content: yes
   register: crumb
 
-- uri:
+- name: Insert GitHub Credential
+  uri:
     method: POST
     url: 'http://{{ jenkins.hostname }}:8080/credentials/store/system/domain/_/createCredentials'
     user: "{{ jenkins.username }}"
@@ -55,14 +59,15 @@
         "": "0",
         "credentials": {
           "scope": "GLOBAL",
-          "id": "{{ credentials.id }}",
-          "secret": "{{ credentials.secret }}",
+          "id": "{{ github.id }}",
+          "secret": "{{ github.secret }}",
           "description": "Token provided for github",
           "$class": "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl"
         }
       }
 
-- copy:
+- name: Copy github config xml
+  copy:
     src: github-plugin-configuration.xml
     dest: /var/lib/jenkins/github-plugin-configuration.xml
     owner: jenkins
@@ -72,30 +77,100 @@
 - name: get github-plugin version
   shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 list-plugins github | awk '{ print $4 }'
   register: githubversion
-    
-- replace:
-    path: /var/lib/jenkins/github-plugin-configuration.xml
-    regexp: '{version}'
-    replace: "{{ githubversion.stdout }}"
 
-- replace:
-    path: /var/lib/jenkins/github-plugin-configuration.xml
-    regexp: '{credentialsId}'
-    replace: "{{ credentials.id }}"
-
-- name: Enable Security for Installation
+- name: set github plugin version
   xml:
-    path: /var/lib/jenkins/config.xml
-    xpath: /hudson/useSecurity
-    value: 'true'
+    path: /var/lib/jenkins/github-plugin-configuration.xml
+    xpath: /github-plugin-configuration
+    attribute: plugin
+    value: github@"{{ githubversion.stdout }}"
+    
+- name: set github plugin credential id
+  xml:
+    path: /var/lib/jenkins/github-plugin-configuration.xml
+    xpath: /github-plugin-configuration/configs/github-server-config/credentialsId
+    value: "{{ github.id }}"
+
+- name: set github plugin url
+  xml:
+    path: /var/lib/jenkins/github-plugin-configuration.xml
+    xpath: /github-plugin-configuration/configs/github-server-config/name
+    value: "{{ github.url }}"
+
+- name: Insert GitLab Credential
+  uri:
+    method: POST
+    url: 'http://{{ jenkins.hostname }}:8080/credentials/store/system/domain/_/createCredentials'
+    user: "{{ jenkins.username }}"
+    password: "{{ jenkins.password }}"
+    force_basic_auth: yes
+    status_code: 200,302
+    headers:
+      Jenkins-Crumb: "{{ crumb.content.split(':')[1] }}"
+    body: |
+      json={
+        "": "0",
+        "credentials": {
+          "scope": "GLOBAL",
+          "id": "{{ gitlab.id }}",
+          "secret": "{{ gitlab.secret }}",
+          "description": "Token provided for gitlab",
+          "$class": "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl"
+        }
+      }
+
+- name: set gitlab plugin name
+  xml:
+    path: /var/lib/jenkins/com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig.xml
+    xpath: /com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig/connections/com.dabsquared.gitlabjenkins.connection.GitLabConnection/name
+    value: "GitLab Connection Name"
+
+- name: set gitlab plugin url
+  xml:
+    path: /var/lib/jenkins/com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig.xml
+    xpath: /com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig/connections/com.dabsquared.gitlabjenkins.connection.GitLabConnection/url
+    value: "{{ gitlab.url }}"
+
+- name: set gitlab plugin url
+  xml:
+    path: /var/lib/jenkins/com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig.xml
+    xpath: /com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig/connections/com.dabsquared.gitlabjenkins.connection.GitLabConnection/apiTokenId
+    value: "{{ gitlab.id }}"
+
+- name: Insert Jenkins .ssh Credential
+  uri:
+    method: POST
+    url: 'http://{{ jenkins.hostname }}:8080/credentials/store/system/domain/_/createCredentials'
+    user: "{{ jenkins.username }}"
+    password: "{{ jenkins.password }}"
+    force_basic_auth: yes
+    status_code: 200,302
+    headers:
+      Jenkins-Crumb: "{{ crumb.content.split(':')[1] }}"
+    body: |
+      json={
+        "": "0",
+        "credentials": {
+          "scope": "GLOBAL",
+          "id": "sshkey-jenkins",
+          "username": "jenkins",
+          "password": "",
+          "privateKeySource": {
+            "stapler-class": "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey$UsersPrivateKeySource",
+          },
+          "description": "jenkins user with ssh",
+          "stapler-class": "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey"
+        }
+      }
 
 - name: Restart Jenkins
   service:
     name: jenkins
     state: restarted
 
-- wait_for:
+- name: Wait for Jenkinsmaster to get back online
+  wait_for:
     host: localhost
     port: 8080
-    delay: 15
+    delay: 20
     state: started

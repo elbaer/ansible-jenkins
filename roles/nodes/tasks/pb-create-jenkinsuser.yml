@@ -11,15 +11,15 @@
     state: present
 
 - name: get ssh key for known host
-  shell: ssh-keyscan -t ecdsa-sha2-nistp256 jenkinsmaster | tail -1
+  shell: ssh-keyscan -t ecdsa-sha2-nistp256 {{ jenkins.hostname }} | tail -1
   register: known_host_jenkinsmaster
 
 - name: get ssh key for known host
-  shell: ssh-keyscan -t ecdsa-sha2-nistp256 dockerslave | tail -1
+  shell: ssh-keyscan -t ecdsa-sha2-nistp256 {{ jenkins.slave1 }} | tail -1
   register: known_host_dockerslave
 
 - name: get ssh key for known host
-  shell: ssh-keyscan -t ecdsa-sha2-nistp256 javaslave | tail -1
+  shell: ssh-keyscan -t ecdsa-sha2-nistp256 {{ jenkins.slave2 }} | tail -1
   register: known_host_javaslave
 
 - name: add know host to variable

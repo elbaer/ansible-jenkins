@@ -5,7 +5,7 @@
       <name>https://www.github.com</name>
       <apiUrl>https://api.github.com</apiUrl>
       <manageHooks>true</manageHooks>
-      <credentialsId>{credentialsId}</credentialsId>
+      <credentialsId>0000</credentialsId>
       <clientCacheSize>20</clientCacheSize>
     </github-server-config>
   </configs>

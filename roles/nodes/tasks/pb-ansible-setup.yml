@@ -42,12 +42,10 @@
 
 - name: ensure passlib python lib is installed
   pip: name=passlib
-  #delegate_to: 127.0.0.1
 
 - name: hash password
-  shell: python -c "from passlib.hash import sha512_crypt; print sha512_crypt.encrypt('someweirdpassword')"
+  shell: python -c "from passlib.hash import sha512_crypt; print sha512_crypt.encrypt('{{ nodes.ansible_user_password }}')"
   register: hashed_pw
-  #delegate_to: 127.0.0.1
   changed_when: false
 
 - name: install ansible user
@@ -86,9 +84,9 @@
     path: /etc/hosts
     insertafter: EOF
     content: |
-      192.168.36.10 jenkinsmaster
-      192.168.36.11 dockerslave
-      192.168.36.12 javaslave
+      192.168.36.10 {{ jenkins.hostname }}
+      192.168.36.11 {{ jenkins.slave1 }}
+      192.168.36.12 {{ jenkins.slave2 }}
 
 - name: add ansible control node public key
   authorized_key:
