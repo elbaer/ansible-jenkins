@@ -1,0 +1,16 @@
+<slave>
+  <name></name>
+  <description></description>
+  <remoteFS></remoteFS>
+  <numExecutors></numExecutors>
+  <mode>NORMAL</mode>
+  <retentionStrategy class='hudson.slaves.RetentionStrategy$Always'/>
+  <launcher class='hudson.plugins.sshslaves.SSHLauncher' plugin=''>
+    <host></host>
+    <port></port>
+    <credentialsId></credentialsId>
+  </launcher>
+  <label></label>
+  <nodeProperties/>
+  <userId></userId>
+</slave>

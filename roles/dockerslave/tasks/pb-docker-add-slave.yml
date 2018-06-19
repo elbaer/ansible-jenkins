@@ -1,0 +1,69 @@
+- name: copy slave template
+  copy: src=../../shared-files/slave-template.xml dest=/tmp/slave-template.xml
+
+- name: get ssh-slaves plugin version
+  shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 -auth {{ jenkins.username }}:{{ jenkins.password }} list-plugins ssh-slaves | awk '{ print $5 }'
+  register: sshversion
+
+- name: set ssh-slaves plugin version
+  xml:
+    path: /tmp/slave-template.xml
+    xpath: /slave/launcher
+    attribute: plugin
+    value: ssh-slaves@"{{ sshversion.stdout }}"
+
+- name: replace node name
+  xml:
+    path: /tmp/slave-template.xml
+    xpath: /slave/name
+    value: "docker2"
+
+- name: replace remote filesystem
+  xml:
+    path: /tmp/slave-template.xml
+    xpath: /slave/remoteFS
+    value: "/home/jenkins/workspace"
+
+- name: replace node numExecutors
+  xml:
+    path: /tmp/slave-template.xml
+    xpath: /slave/numExecutors
+    value: "2"
+
+- name: replace node launcher host
+  xml:
+    path: /tmp/slave-template.xml
+    xpath: /slave/launcher/host
+    value: "{{ jenkins.slave1 }}"
+
+- name: replace node launcher port
+  xml:
+    path: /tmp/slave-template.xml
+    xpath: /slave/launcher/port
+    value: "22"
+
+- name: replace node launcher credentialsId
+  xml:
+    path: /tmp/slave-template.xml
+    xpath: /slave/launcher/credentialsId
+    value: "sshkey-jenkins"
+
+- name: replace node name
+  xml:
+    path: /tmp/slave-template.xml
+    xpath: /slave/label
+    value: "docker"
+
+- name: replace node name
+  xml:
+    path: /tmp/slave-template.xml
+    xpath: /slave/userId
+    value: "jenkins"
+
+- name: add docker host
+  shell: cat /tmp/slave-template.xml | java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 -auth {{ jenkins.username }}:{{ jenkins.password }} create-node
+
+- name: Clean slave template
+  file:
+    state: absent
+    path: "/tmp/slave-template.xml"

@@ -31,3 +31,8 @@ Link für Credentials
 
 Docker Slave hinzufügen... Eventuell gibt es eine Möglichkeit das Ganze via API zu konfigurieren
 <https://support.cloudbees.com/hc/en-us/articles/115003896171-Creating-node-with-Rest-API-and-ManuallyTrustedKeyVerificationStrategy>
+
+<https://gist.github.com/sergeyhush/4e892837cf5c31c3d242>
+
+Ansible Vault
+<https://serversforhackers.com/c/how-ansible-vault-works>
