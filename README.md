@@ -36,3 +36,5 @@ Docker Slave hinzufügen... Eventuell gibt es eine Möglichkeit das Ganze via AP
 
 Ansible Vault
 <https://serversforhackers.com/c/how-ansible-vault-works>
+
+User/Password für Gitlab & Github einrichten
