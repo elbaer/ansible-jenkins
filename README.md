@@ -38,5 +38,3 @@ Ansible Vault
 <https://serversforhackers.com/c/how-ansible-vault-works>
 
 User/Password für Gitlab & Github einrichten
-
-dockerslave hat noch kein GIT

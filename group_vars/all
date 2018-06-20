@@ -79,7 +79,19 @@ github:
     id: github-access-token 
     secret: *****
 
+githubUserAccount:
+    url: "https://www.github.com"
+    id: github-user-account
+    username: elbaer
+    password: *****
+
 gitlab:
     url: "https://gitlab.puzzle.ch"
     id: gitlab-access-token 
     secret: *****
+
+gitlabUserAccount:
+    url: "https://gitlab.puzzle.ch"
+    id: gitlab-user-account
+    username: cbaer
+    password: *****

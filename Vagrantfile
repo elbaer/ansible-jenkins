@@ -27,6 +27,4 @@ Vagrant.configure("2") do |config|
       end
     end
   end
-  
-  config.vm.provision :shell, inline: "yum -y -q install python java"
 end

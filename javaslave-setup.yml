@@ -1,0 +1,8 @@
+---
+
+- name: Setup and Configure Javaslave
+  hosts: java
+  become: yes
+
+  roles:
+    - javaslave

@@ -5,11 +5,7 @@
     path: /var/lib/jenkins/config.xml
     xpath: /hudson/useSecurity
     value: 'false'
-
-- name: Restart Jenkins
-  service:
-    name: jenkins
-    state: restarted
+  notify: restart-jenkins-service
 
 - name: Wait for Jenkinsmaster to get back online
   wait_for:
@@ -74,10 +70,12 @@
     xpath: /hudson/installStateName
     value: 'RUNNING'
 
-- name: Restart Jenkins
-  service:
-    name: jenkins
-    state: restarted
+- name: Disable executors on Master
+  xml:
+    path: /var/lib/jenkins/config.xml
+    xpath: /hudson/numExecutors
+    value: '0'
+  notify: restart-jenkins-service
 
 - name: Wait for Jenkinsmaster to get back online
   wait_for:

@@ -1,0 +1,4 @@
+- import_playbook: nodes-setup.yml
+- import_playbook: jenkinsmaster-setup.yml
+- import_playbook: dockerslave-setup.yml
+- import_playbook: javaslave-setup.yml

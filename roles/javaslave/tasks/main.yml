@@ -1,0 +1,4 @@
+---
+- import_tasks: pb-java-setup.yml
+- import_tasks: pb-java-add-slave.yml
+  delegate_to: jenkinsmaster

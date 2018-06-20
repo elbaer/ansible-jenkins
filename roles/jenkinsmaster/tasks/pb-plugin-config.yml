@@ -3,11 +3,7 @@
 - name: Install Jenkinsplugin
   shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080/ -auth {{ jenkins.username }}:{{ jenkins.password }} install-plugin {{ item }}
   loop: "{{ jenkins.plugins }}"
-  
-- name: Restart Jenkins
-  service:
-    name: jenkins
-    state: restarted
+  notify: restart-jenkins-service
 
 - name: Wait for Jenkinsmaster to get back online
   wait_for:
@@ -119,6 +115,53 @@
         }
       }
 
+- name: Insert GitLabUser Credential
+  uri:
+    method: POST
+    url: 'http://{{ jenkins.hostname }}:8080/credentials/store/system/domain/_/createCredentials'
+    user: "{{ jenkins.username }}"
+    password: "{{ jenkins.password }}"
+    force_basic_auth: yes
+    status_code: 200,302
+    headers:
+      Jenkins-Crumb: "{{ crumb.content.split(':')[1] }}"
+    body: |
+      json={
+        "": "0",
+        "credentials": {
+          "scope": "GLOBAL",
+          "id": "{{ gitlabUserAccount.id }}",
+          "username": "{{ gitlabUserAccount.username }}",
+          "password": "{{ gitlabUserAccount.password }}",
+          "description": "User Account for gitlab",
+          "$class": "com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl"
+        }
+      }
+
+- name: Insert GitHubUser Credential
+  uri:
+    method: POST
+    url: 'http://{{ jenkins.hostname }}:8080/credentials/store/system/domain/_/createCredentials'
+    user: "{{ jenkins.username }}"
+    password: "{{ jenkins.password }}"
+    force_basic_auth: yes
+    status_code: 200,302
+    headers:
+      Jenkins-Crumb: "{{ crumb.content.split(':')[1] }}"
+    body: |
+      json={
+        "": "0",
+        "credentials": {
+          "scope": "GLOBAL",
+          "id": "{{ githubUserAccount.id }}",
+          "username": "{{ githubUserAccount.username }}",
+          "password": "{{ githubUserAccount.password }}",
+          "description": "User Account for github",
+          "$class": "com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl"
+        }
+      }
+
+
 - name: set gitlab plugin name
   xml:
     path: /var/lib/jenkins/com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig.xml
@@ -162,11 +205,7 @@
           "stapler-class": "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey"
         }
       }
-
-- name: Restart Jenkins
-  service:
-    name: jenkins
-    state: restarted
+  notify: restart-jenkins-service
 
 - name: Wait for Jenkinsmaster to get back online
   wait_for:
