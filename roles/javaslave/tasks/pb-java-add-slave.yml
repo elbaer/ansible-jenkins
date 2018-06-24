@@ -2,7 +2,7 @@
   copy: src=../../shared-files/slave-template.xml dest=/tmp/slave-template.xml
 
 - name: get ssh-slaves plugin version
-  shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 -auth {{ jenkins.username }}:{{ jenkins.password }} list-plugins ssh-slaves | awk '{ print $5 }'
+  shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 -auth {{ jenkinscredentials.username }}:{{ jenkinscredentials.password }} list-plugins ssh-slaves | awk '{ print $5 }'
   register: sshversion
 
 - name: set ssh-slaves plugin version
@@ -61,7 +61,7 @@
     value: "jenkins"
 
 - name: add java host
-  shell: cat /tmp/slave-template.xml | java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 -auth {{ jenkins.username }}:{{ jenkins.password }} create-node
+  shell: cat /tmp/slave-template.xml | java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 -auth {{ jenkinscredentials.username }}:{{ jenkinscredentials.password }} create-node
 
 - name: Clean slave template
   file:

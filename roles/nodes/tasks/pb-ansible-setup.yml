@@ -19,14 +19,8 @@
     when: not epel_repofile_result.stat.exists
 
   - name: install modules
-    yum:
-      name:
-        - python
-        - libselinux-python
-        - python2-pip
-        - git
-        - java-1.8.0-openjdk.x86_64
-      state: installed
+    yum: name={{ item }} state=installed
+    loop: "{{ nodes.plugins }}"
 
 - name: ensure ssh password authentication is ok
   lineinfile:
@@ -39,13 +33,13 @@
   pip: name=passlib
 
 - name: hash password
-  shell: python -c "from passlib.hash import sha512_crypt; print sha512_crypt.encrypt('{{ nodes.ansible_user_password }}')"
+  shell: python -c "from passlib.hash import sha512_crypt; print sha512_crypt.encrypt('{{ ansiblecredentials.password }}')"
   register: hashed_pw
   changed_when: false
 
 - name: install ansible user
   user:
-    name: "{{ nodes.ansible_user_name }}"
+    name: "{{ ansiblecredentials.username }}"
     state: present
     shell: /bin/bash
     password: "{{ hashed_pw.stdout }}"
@@ -53,8 +47,8 @@
 
 - name: create sudo rules for ansible user
   copy:
-    content: "{{ nodes.ansible_user_name }} ALL=(ALL:ALL) NOPASSWD:ALL"
-    dest: /etc/sudoers.d/10_{{ nodes.ansible_user_name }}
+    content: "{{ ansiblecredentials.username }} ALL=(ALL:ALL) NOPASSWD:ALL"
+    dest: /etc/sudoers.d/10_{{ ansiblecredentials.username }}
     owner: root
     group: root
     mode: 0644
@@ -85,6 +79,6 @@
 
 - name: add ansible control node public key
   authorized_key:
-    user: "{{ nodes.ansible_user_name }}"
+    user: "{{ ansiblecredentials.username }}"
     state: present
     key: "{{ lookup('file', 'ssh-keys/id_rsa.pub') }}"

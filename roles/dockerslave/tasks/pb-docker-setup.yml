@@ -3,7 +3,7 @@
   group:
     name: docker
 
-- name: adding docker role to jenkins
+- name: adding Docker role to Jenkins
   user:
     name: "{{ item }}"
     groups: docker
@@ -12,18 +12,22 @@
     - jenkins
     - vagrant
 
-- name: upgrade all packages
+- name: Upgrade all Packages
   yum:
     name: '*'
     state: latest
 
-- name: install docker
+- name: Install Docker
   package:
     name: docker
     state: present
-  notify: restart-docker-service
 
-- name: docker is started and enabled
+- name: Restart Docker
+  service:
+    name: docker
+    state: restarted
+
+- name: Docker is started and enabled
   service:
     name: docker
     state: started

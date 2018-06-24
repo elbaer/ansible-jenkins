@@ -10,11 +10,15 @@
     state: present
     key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
 
-- name: install Jenkins
+- name: Install Jenkins
   yum:
     name=jenkins
     state=present
-  notify: restart-jenkins-service
+
+- name: Start Jenkins
+  service:
+    name: jenkins
+    state: started
 
 - name: Wait for Jenkinsmaster to get back online
   wait_for:

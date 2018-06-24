@@ -17,4 +17,8 @@
     dest: /lib/systemd/system/docker.service
     line: "EnvironmentFile=/etc/default/docker"
     insertbefore: "^ExecStart"
-  notify: restart-docker-service
+
+- name: Restart Docker
+  service:
+    name: docker
+    state: restarted

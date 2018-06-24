@@ -5,7 +5,10 @@
     path: /var/lib/jenkins/config.xml
     xpath: /hudson/useSecurity
     value: 'false'
-  notify: restart-jenkins-service
+- name: Restart Jenkins
+  service:
+    name: jenkins 
+    state: restarted
 
 - name: Wait for Jenkinsmaster to get back online
   wait_for:
@@ -15,7 +18,7 @@
     state: started
 
 - name: Create User
-  shell: echo 'hpsr=new hudson.security.HudsonPrivateSecurityRealm(false); hpsr.createAccount("{{ jenkins.username }}", "{{ jenkins.password }}")' | java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 groovy =
+  shell: echo 'hpsr=new hudson.security.HudsonPrivateSecurityRealm(false); hpsr.createAccount("{{ jenkinscredentials.username }}", "{{ jenkinscredentials.password }}")' | java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 groovy =
   register: create_result
 
 - debug:
@@ -75,7 +78,11 @@
     path: /var/lib/jenkins/config.xml
     xpath: /hudson/numExecutors
     value: '0'
-  notify: restart-jenkins-service
+
+- name: Restart Jenkins
+  service:
+    name: jenkins 
+    state: restarted
 
 - name: Wait for Jenkinsmaster to get back online
   wait_for:

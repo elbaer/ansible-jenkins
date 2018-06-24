@@ -1,16 +1,20 @@
 nodes:
-    ansible_user_name: ansible
-    ansible_user_password: someweirdpassword
     epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
     epel_repo_gpg_key_url: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
     epel_repofile_path: "/etc/yum.repos.d/epel.repo"
+
+    plugins:
+        - python
+        - libselinux-python
+        - python2-pip
+        - git
+        - java-1.8.0-openjdk.x86_64
 
 jenkins:
     hostname: jenkinsmaster
     slave1: dockerslave
     slave2: javaslave
-    username: dummyuser
-    password: dummypassword
+
     plugins:
         - ant
         - antisamy-markup-formatter
@@ -72,26 +76,4 @@ jenkins:
         - workflow-aggregator
         - workflow-basic-steps
         - workflow-multibranch
-        - ws-cleanup        
-
-github:
-    url: "https://www.github.com"
-    id: github-access-token 
-    secret: *****
-
-githubUserAccount:
-    url: "https://www.github.com"
-    id: github-user-account
-    username: elbaer
-    password: *****
-
-gitlab:
-    url: "https://gitlab.puzzle.ch"
-    id: gitlab-access-token 
-    secret: *****
-
-gitlabUserAccount:
-    url: "https://gitlab.puzzle.ch"
-    id: gitlab-user-account
-    username: cbaer
-    password: *****
+        - ws-cleanup
