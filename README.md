@@ -24,17 +24,21 @@ to retry, use: --limit @/Users/Silversurfer/git-projects/ansible-jenkins/setup-j
 
 -> Einfach nochmal ausführen, scheint ein vorübergehender Fehler zu sein
 
-Link für Credentials
-<https://getintodevops.com/blog/how-to-add-jenkins-credentials-with-curl-or-ansible>
-
 ## Tasks
-
-Docker Slave hinzufügen... Eventuell gibt es eine Möglichkeit das Ganze via API zu konfigurieren
-<https://support.cloudbees.com/hc/en-us/articles/115003896171-Creating-node-with-Rest-API-and-ManuallyTrustedKeyVerificationStrategy>
-
-<https://gist.github.com/sergeyhush/4e892837cf5c31c3d242>
 
 Ansible Vault
 <https://serversforhackers.com/c/how-ansible-vault-works>
 
-User/Password für Gitlab & Github einrichten
+ * General Settings -> neue Cloud (Docker) -> mit tcp://ip-docker-slave:4243 verbinden
+ * Unter dem Punkt 'Pipeline Model Definition' kann man das Label des docker-slaves angeben, da es in der Pipeline nicht möglich ist, den entsprechend Slave anzugeben auf dem gebuildet werden soll
+
+## Links
+
+Slaves hinzufügen
+
+* <https://support.cloudbees.com/hc/en-us/articles/115003896171-Creating-node-with-Rest-API-and-ManuallyTrustedKeyVerificationStrategy>
+* <https://gist.github.com/sergeyhush/4e892837cf5c31c3d242>
+
+Credentials
+
+* <https://getintodevops.com/blog/how-to-add-jenkins-credentials-with-curl-or-ansible>
