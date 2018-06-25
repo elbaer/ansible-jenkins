@@ -1,5 +1,4 @@
 ---
 - import_tasks: pb-docker-setup.yml
-- import_tasks: pb-docker-config.yml
 - import_tasks: pb-docker-add-slave.yml
   delegate_to: jenkinsmaster

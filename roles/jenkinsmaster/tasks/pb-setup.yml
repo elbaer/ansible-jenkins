@@ -24,7 +24,7 @@
   wait_for:
     host: localhost
     port: 8080
-    delay: 20
+    delay: 30
     state: started
 
 - name: Download jenkins Cli 

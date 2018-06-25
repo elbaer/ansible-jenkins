@@ -9,11 +9,17 @@ nodes:
         - python2-pip
         - git
         - java-1.8.0-openjdk.x86_64
+        - java-1.8.0-openjdk-devel.x86_64
+        - net-tools
+        - telnet
+        - gcc-c++
+        - make 
 
 jenkins:
     hostname: jenkinsmaster
     slave1: dockerslave
     slave2: javaslave
+    dockerswarm: dockerswarm
 
     plugins:
         - ant

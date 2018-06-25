@@ -10,23 +10,28 @@
     password: "{{ hashed_pw.stdout }}"
     state: present
 
-- name: get ssh key for known host
+- name: get ssh key for {{ jenkins.hostname }}
   shell: ssh-keyscan -t ecdsa-sha2-nistp256 {{ jenkins.hostname }} | tail -1
   register: known_host_jenkinsmaster
 
-- name: get ssh key for known host
+- name: get ssh key for {{ jenkins.slave1 }}
   shell: ssh-keyscan -t ecdsa-sha2-nistp256 {{ jenkins.slave1 }} | tail -1
   register: known_host_dockerslave
 
-- name: get ssh key for known host
+- name: get ssh key for {{ jenkins.slave2 }}
   shell: ssh-keyscan -t ecdsa-sha2-nistp256 {{ jenkins.slave2 }} | tail -1
   register: known_host_javaslave
+
+- name: get ssh key for {{ jenkins.dockerswarm }}
+  shell: ssh-keyscan -t ecdsa-sha2-nistp256 {{ jenkins.dockerswarm }} | tail -1
+  register: known_host_dockerswarm
 
 - name: add know host to variable
   set_fact: 
     jenkinsmaster: "{{ known_host_jenkinsmaster.stdout }}"
-    javaslave: "{{ known_host_dockerslave.stdout }}"
-    dockerslave:  "{{ known_host_javaslave.stdout }}"
+    javaslave: "{{ known_host_javaslave.stdout }}"
+    dockerslave:  "{{ known_host_dockerslave.stdout }}"
+    swarmmaster:  "{{ known_host_dockerswarm.stdout }}"
 
 - name: add ansible control node public key
   authorized_key:
@@ -49,6 +54,7 @@
       {{ jenkinsmaster }} 
       {{ javaslave }}
       {{ dockerslave }}
+      {{ swarmmaster }}
     create: yes
     mode: 0644
     owner: jenkins

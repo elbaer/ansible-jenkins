@@ -6,8 +6,9 @@ SCRIPT
 
 nodes = [
   { :hostname => 'jenkinsmaster', :ip => '192.168.36.10', :box => 'centos/7', :ram => 1024 },
-  { :hostname => 'dockerslave',   :ip => '192.168.36.11', :box => 'centos/7' },
-  { :hostname => 'javaslave',     :ip => '192.168.36.12', :box => 'centos/7' }
+  { :hostname => 'dockerslave',   :ip => '192.168.36.11', :box => 'centos/7', :ram => 1024 },
+  { :hostname => 'javaslave',     :ip => '192.168.36.12', :box => 'centos/7', :ram => 1024 },
+  { :hostname => 'dockerswarm',   :ip => '192.168.36.13', :box => 'centos/7', :ram => 2048 }
 ]
 
 Vagrant.configure("2") do |config|

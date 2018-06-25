@@ -1,3 +1,3 @@
 /.vagrant
 *.retry
-test.yml
+test*.yml

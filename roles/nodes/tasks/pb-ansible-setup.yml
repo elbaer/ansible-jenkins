@@ -76,6 +76,7 @@
       192.168.36.10 {{ jenkins.hostname }}
       192.168.36.11 {{ jenkins.slave1 }}
       192.168.36.12 {{ jenkins.slave2 }}
+      192.168.36.13 {{ jenkins.dockerswarm }}
 
 - name: add ansible control node public key
   authorized_key:

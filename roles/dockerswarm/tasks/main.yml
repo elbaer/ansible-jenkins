@@ -1,0 +1,5 @@
+---
+- import_tasks: pb-dockerswarm-setup.yml
+- import_tasks: pb-dockerswarm-config.yml
+- import_tasks: pb-dockerswarm-add.yml
+  delegate_to: jenkinsmaster

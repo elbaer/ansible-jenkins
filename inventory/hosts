@@ -10,6 +10,9 @@ dockerslave ansible_host=192.168.36.11
 [java]
 javaslave ansible_host=192.168.36.12
 
+[swarm]
+dockerswarm ansible_host=192.168.36.13
+
 [slave:children]
 docker
 java
@@ -17,3 +20,4 @@ java
 [remote:children]
 slave
 master
+swarm

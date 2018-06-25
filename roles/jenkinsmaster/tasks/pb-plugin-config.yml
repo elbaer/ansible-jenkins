@@ -1,22 +1,22 @@
 ---
 
-- name: Install Jenkinsplugin
+- name: install Jenkinsplugins
   shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080/ -auth {{ jenkinscredentials.username }}:{{ jenkinscredentials.password }} install-plugin {{ item }}
   loop: "{{ jenkins.plugins }}"
 
-- name: Restart Jenkins
+- name: restart Jenkins
   service:
     name: jenkins 
     state: restarted
 
-- name: Wait for Jenkinsmaster to get back online
+- name: wait for Jenkinsmaster to get back online
   wait_for:
     host: localhost
     port: 8080
     delay: 20
     state: started
 
-- name: Copy locale.xml to Jenkinsmaster
+- name: copy locale.xml to Jenkinsmaster
   copy:
     src: locale.xml
     dest: /var/lib/jenkins/locale.xml
@@ -28,7 +28,7 @@
   shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 -auth {{ jenkinscredentials.username }}:{{ jenkinscredentials.password }} list-plugins locale | awk '{ print $4 }'
   register: localeversion
 
-- name: set locale plugin version
+- name: set Locale Plugin Version
   xml:
     path: /var/lib/jenkins/locale.xml
     xpath: /locale
@@ -44,7 +44,7 @@
     return_content: yes
   register: crumb
 
-- name: Insert GitHub Credential
+- name: insert GitHub Credential
   uri:
     method: POST
     url: 'http://{{ jenkins.hostname }}:8080/credentials/store/system/domain/_/createCredentials'
@@ -66,7 +66,7 @@
         }
       }
 
-- name: Copy github config xml
+- name: copy GitHub Config XML
   copy:
     src: github-plugin-configuration.xml
     dest: /var/lib/jenkins/github-plugin-configuration.xml
@@ -74,24 +74,24 @@
     group: jenkins
     mode: "u=rw,g=r,o=r"
 
-- name: get github-plugin version
+- name: get GitHub Plugin Version
   shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 list-plugins github | awk '{ print $4 }'
   register: githubversion
 
-- name: set github plugin version
+- name: set GitHub Plugin Version
   xml:
     path: /var/lib/jenkins/github-plugin-configuration.xml
     xpath: /github-plugin-configuration
     attribute: plugin
     value: github@"{{ githubversion.stdout }}"
     
-- name: set github plugin credential id
+- name: set GitHub Plugin Credential Id
   xml:
     path: /var/lib/jenkins/github-plugin-configuration.xml
     xpath: /github-plugin-configuration/configs/github-server-config/credentialsId
     value: "{{ github.id }}"
 
-- name: set github plugin url
+- name: set GitHub Plugin URL
   xml:
     path: /var/lib/jenkins/github-plugin-configuration.xml
     xpath: /github-plugin-configuration/configs/github-server-config/name
@@ -119,7 +119,7 @@
         }
       }
 
-- name: Insert GitLabUser Credential
+- name: insert GitLab User Credential
   uri:
     method: POST
     url: 'http://{{ jenkins.hostname }}:8080/credentials/store/system/domain/_/createCredentials'
@@ -142,7 +142,7 @@
         }
       }
 
-- name: Insert GitHubUser Credential
+- name: insert GitHub User Credential
   uri:
     method: POST
     url: 'http://{{ jenkins.hostname }}:8080/credentials/store/system/domain/_/createCredentials'
@@ -165,26 +165,7 @@
         }
       }
 
-
-- name: set gitlab plugin name
-  xml:
-    path: /var/lib/jenkins/com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig.xml
-    xpath: /com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig/connections/com.dabsquared.gitlabjenkins.connection.GitLabConnection/name
-    value: "GitLab Connection Name"
-
-- name: set gitlab plugin url
-  xml:
-    path: /var/lib/jenkins/com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig.xml
-    xpath: /com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig/connections/com.dabsquared.gitlabjenkins.connection.GitLabConnection/url
-    value: "{{ gitlab.url }}"
-
-- name: set gitlab plugin url
-  xml:
-    path: /var/lib/jenkins/com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig.xml
-    xpath: /com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig/connections/com.dabsquared.gitlabjenkins.connection.GitLabConnection/apiTokenId
-    value: "{{ gitlab.id }}"
-
-- name: Insert Jenkins .ssh Credential
+- name: insert Jenkins .ssh Credential
   uri:
     method: POST
     url: 'http://{{ jenkins.hostname }}:8080/credentials/store/system/domain/_/createCredentials'
@@ -203,19 +184,39 @@
           "username": "jenkins",
           "password": "",
           "privateKeySource": {
-            "stapler-class": "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey$UsersPrivateKeySource",
+            "stapler-class": "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey$DirectEntryPrivateKeySource",
+            "privateKey": "-----BEGIN RSA PRIVATE KEY-----MIIEogIBAAKCAQEAno5LtkLrQyspqkKnyJjTiTuGsLgnL1nNtLzWdNjtRJqEwtLLenMqLfUk4JmTQbb/G7toYfhxYchEhti4XpSzuPlIXGbtONHKsvTfx/dwG2hIEF8axyEdfwLitqGITeLMhUeDCGxpQgENmmeIrpuBG2/ceMLR3b4Nuoe5+Qn38yy1GnfE2ub/SppqGTrC/51NRMvHL2w8xBWPdVDl/DRaJ6+O41z8HJkF9IL+3j/ifgISDFhT78PF4sL/nB5JGqpGJjIZsdRDQEEk5k/NWi6ubfN0u0JqlTY7YJurqUvLyQG/LIg1N757I72gtyxDvIpxUiIr/URMJZyK8S3H2in7KwIDAQABAoIBAEC1Hd0CLnU5FkXv8f2BsULeUjeo0AUZB0RtlLAXH63RycCgun38pggfda9bvaciAbbVouHovI0FaEIIDCY9VaN1yLw9HS8FH04tdW5sYwosYsybo5gEwb7l9JRIFBKFLqZt6uHzLHnNaDnNaxCnUedanYWDLJbsSzoGzjT+hnxs6+/Q4Ty8cgw66cj5od5y2ObfJefqUyPxI+WulLsuW9zUmM88nMZd8ubHcnTFToZkW++j53YD0QgJuUVfwzBPPhKI3FLbme5scVknscfZ5ORUsTJifOSdYh+BET6c9jBsOQHa4JkFIP+mxOZn0cfCdu/xIEUJL5ibT0oSsUoxeOECgYEAz4bYObV26qyX8VDy5YCpF8XxDo+jTC00qIH7gO8SDkFBPdZ+dB0lk+gVBA4ONXDzf9LtPX8PjryBYD2ubNLBRsPZgHXcqyohTWMIOwDFdkMo2BwB+F51WBn+h6HJVfCWk6pyqap+agXkjK2uLx6OYKUIunNnTcEkghtBznnA7BkCgYEAw5c22/jMnEv0DpPpMdvKdtVcgO1GFkKle9FyH97fueJ7qao/8zpT+zh+WrfFEKe5a3Wpu3knKNAMRwhIiQbvPAz1i1Hn46TQJsm8M4nAFVzpdK3rGB27GXr/OPmSTZfr+EfVPUH2mH0gCUldsE/Dh2+Nyv4RGFVRbInd2kehyeMCgYA5dDuovnSNw/rM9HxKzbQCwOpb/ahYDqvlexcGOynkiGxnklqwCuG8cSRgWwPUB9FiMiM8Q1ErU0T+QBVqS273CIHO7tKJEMDni+Nbcns4op9MNXTWLlCOc6PkKQZ0pIcLmsTj9C/LapY73Fm88di5KPehpxGSlUZmPuWZJFwlAQKBgDDqMlgVAubbv++dYiaL9zh856N+s5aBmG081jPOQ1lzoMWvxEqJ/dLIMCFz8B7YM3ECfi5agEaesVNaaPmL+GymOQpcs4elAkGRFjY1bwposCH0FOV1GgOnVQjksYgiRGtVW6j0RD2inU51QK8FY7sNVQK9Q304aSKh4A/k9jtNAoGAAlfS0ChzWTddlLmuTNEhmRlqu59AWlsoJYXLtqxR+aYvP4ws1HFi2+XWiy7Yr+TsMN9MPHgny2cs/cfOqwxEWDJUeuLVRPXeDZeNh9H9IcLHbWjvtQdGoRB08CcPR9SMNB7w/p4qp47JtKP4EJqmtALf6ShABBRXqIn/REz4CSU=-----END RSA PRIVATE KEY-----"
+#            "privateKey": "{{ lookup('file', '../../../ssh-keys/id_rsa') }}"
           },
-          "description": "jenkins user with ssh",
+          "description": "apicredentials",
           "stapler-class": "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey"
         }
       }
 
-- name: Restart Jenkins
+- name: set GitLab Connection Name
+  xml:
+    path: /var/lib/jenkins/com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig.xml
+    xpath: /com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig/connections/com.dabsquared.gitlabjenkins.connection.GitLabConnection/name
+    value: "GitLab Connection Name"
+
+- name: set GitLab Plugin URL
+  xml:
+    path: /var/lib/jenkins/com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig.xml
+    xpath: /com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig/connections/com.dabsquared.gitlabjenkins.connection.GitLabConnection/url
+    value: "{{ gitlab.url }}"
+
+- name: set GitLab Plugin API Token
+  xml:
+    path: /var/lib/jenkins/com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig.xml
+    xpath: /com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig/connections/com.dabsquared.gitlabjenkins.connection.GitLabConnection/apiTokenId
+    value: "{{ gitlab.id }}"
+
+- name: restart Jenkins
   service:
     name: jenkins 
     state: restarted
 
-- name: Wait for Jenkinsmaster to get back online
+- name: wait for Jenkinsmaster to get back online
   wait_for:
     host: localhost
     port: 8080

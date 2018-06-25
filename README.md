@@ -29,8 +29,11 @@ to retry, use: --limit @/Users/Silversurfer/git-projects/ansible-jenkins/setup-j
 Ansible Vault
 <https://serversforhackers.com/c/how-ansible-vault-works>
 
- * General Settings -> neue Cloud (Docker) -> mit tcp://ip-docker-slave:4243 verbinden
- * Unter dem Punkt 'Pipeline Model Definition' kann man das Label des docker-slaves angeben, da es in der Pipeline nicht möglich ist, den entsprechend Slave anzugeben auf dem gebuildet werden soll
+* General Settings -> neue Cloud (Docker) -> mit tcp://ip-docker-slave:4243 verbinden
+* Unter dem Punkt 'Pipeline Model Definition' kann man das Label des docker-slaves angeben, da es in der Pipeline nicht möglich ist, den entsprechend Slave anzugeben auf dem gebuildet werden soll
+
+* IPs anhand von inventory/hosts anlegen (dynamische Zuweisung)
+* <https://stackoverflow.com/questions/48386717/ansible-slurp-as-private-key-in-jenkins-credential-api-error-for-json-parsing>
 
 ## Links
 

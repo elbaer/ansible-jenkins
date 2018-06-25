@@ -1,0 +1,6 @@
+---
+- name: Add Dockerswarm to Jenkins
+  shell: echo docker -v
+  register: dockerversion
+- debug:
+    msg: dockerversion

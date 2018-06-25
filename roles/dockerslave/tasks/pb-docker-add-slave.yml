@@ -48,13 +48,13 @@
     xpath: /slave/launcher/credentialsId
     value: "sshkey-jenkins"
 
-- name: replace node name
+- name: replace node label
   xml:
     path: /tmp/slave-template.xml
     xpath: /slave/label
     value: "docker"
 
-- name: replace node name
+- name: Replace UserId of Label
   xml:
     path: /tmp/slave-template.xml
     xpath: /slave/userId
