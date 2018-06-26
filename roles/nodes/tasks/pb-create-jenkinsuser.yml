@@ -1,45 +1,45 @@
 ---
 
-- name: hash password
+- name: hash Password
   shell: python -c "from passlib.hash import sha512_crypt; print sha512_crypt.encrypt('jenkins')"
   register: hashed_pw
 
-- name: Creating User
+- name: create User
   user:
     name: "jenkins"
     password: "{{ hashed_pw.stdout }}"
     state: present
 
-- name: get ssh key for {{ jenkins.hostname }}
+- name: get ssh Key for {{ jenkins.hostname }}
   shell: ssh-keyscan -t ecdsa-sha2-nistp256 {{ jenkins.hostname }} | tail -1
   register: known_host_jenkinsmaster
 
-- name: get ssh key for {{ jenkins.slave1 }}
+- name: get ssh Key for {{ jenkins.slave1 }}
   shell: ssh-keyscan -t ecdsa-sha2-nistp256 {{ jenkins.slave1 }} | tail -1
   register: known_host_dockerslave
 
-- name: get ssh key for {{ jenkins.slave2 }}
+- name: get ssh Key for {{ jenkins.slave2 }}
   shell: ssh-keyscan -t ecdsa-sha2-nistp256 {{ jenkins.slave2 }} | tail -1
   register: known_host_javaslave
 
-- name: get ssh key for {{ jenkins.dockerswarm }}
+- name: get ssh Key for {{ jenkins.dockerswarm }}
   shell: ssh-keyscan -t ecdsa-sha2-nistp256 {{ jenkins.dockerswarm }} | tail -1
   register: known_host_dockerswarm
 
-- name: add know host to variable
+- name: add every know_host to Variable
   set_fact: 
     jenkinsmaster: "{{ known_host_jenkinsmaster.stdout }}"
     javaslave: "{{ known_host_javaslave.stdout }}"
     dockerslave:  "{{ known_host_dockerslave.stdout }}"
     swarmmaster:  "{{ known_host_dockerswarm.stdout }}"
 
-- name: add ansible control node public key
+- name: add Ansible Control Node Public Key
   authorized_key:
     user: "jenkins"
     state: present
     key: "{{ lookup('file', 'ssh-keys/id_rsa.pub') }}"
 
-- name: Copy private key to .ssh
+- name: copy Private Key to .ssh
   copy:
     src: ssh-keys/id_rsa
     dest: /home/jenkins/.ssh/
@@ -47,7 +47,7 @@
     owner: jenkins
     group: jenkins
 
-- name: add all hosts to known_hosts
+- name: add all Hosts to known_hosts
   blockinfile:
     path: /home/jenkins/.ssh/known_hosts
     block: |

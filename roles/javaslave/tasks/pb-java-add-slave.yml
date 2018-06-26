@@ -1,69 +1,69 @@
-- name: copy slave template
+- name: copy Slave Template
   copy: src=../../shared-files/slave-template.xml dest=/tmp/slave-template.xml
 
-- name: get ssh-slaves plugin version
+- name: get ssh-slaves Plugin Version
   shell: java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 -auth {{ jenkinscredentials.username }}:{{ jenkinscredentials.password }} list-plugins ssh-slaves | awk '{ print $5 }'
   register: sshversion
 
-- name: set ssh-slaves plugin version
+- name: set ssh-slaves Plugin Version
   xml:
     path: /tmp/slave-template.xml
     xpath: /slave/launcher
     attribute: plugin
     value: ssh-slaves@"{{ sshversion.stdout }}"
 
-- name: replace node name
+- name: set Node Name
   xml:
     path: /tmp/slave-template.xml
     xpath: /slave/name
     value: "java"
 
-- name: replace remote filesystem
+- name: set Remote Workspace
   xml:
     path: /tmp/slave-template.xml
     xpath: /slave/remoteFS
     value: "/home/jenkins/workspace"
 
-- name: replace node numExecutors
+- name: set Node numExecutors
   xml:
     path: /tmp/slave-template.xml
     xpath: /slave/numExecutors
     value: "2"
 
-- name: replace node launcher host
+- name: set Node Launcher Host
   xml:
     path: /tmp/slave-template.xml
     xpath: /slave/launcher/host
     value: "{{ jenkins.slave2 }}"
 
-- name: replace node launcher port
+- name: set Node Launcher Port
   xml:
     path: /tmp/slave-template.xml
     xpath: /slave/launcher/port
     value: "22"
 
-- name: replace node launcher credentialsId
+- name: set Node Launcher credentialsId
   xml:
     path: /tmp/slave-template.xml
     xpath: /slave/launcher/credentialsId
     value: "sshkey-jenkins"
 
-- name: replace node name
+- name: set Node Label
   xml:
     path: /tmp/slave-template.xml
     xpath: /slave/label
     value: "java"
 
-- name: replace node name
+- name: set Node userId
   xml:
     path: /tmp/slave-template.xml
     xpath: /slave/userId
     value: "jenkins"
 
-- name: add java host
+- name: add Javaslave to Jenkinsmaster
   shell: cat /tmp/slave-template.xml | java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 -auth {{ jenkinscredentials.username }}:{{ jenkinscredentials.password }} create-node
 
-- name: Clean slave template
+- name: clean Slave Template
   file:
     state: absent
     path: "/tmp/slave-template.xml"

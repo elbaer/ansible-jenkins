@@ -1,6 +1,6 @@
 ---
 
-- name: Disable Security for Installation
+- name: disable Security for Installation
   xml:
     path: /var/lib/jenkins/config.xml
     xpath: /hudson/useSecurity
@@ -10,21 +10,21 @@
     name: jenkins 
     state: restarted
 
-- name: Wait for Jenkinsmaster to get back online
+- name: wait for Jenkinsmaster to get back online
   wait_for:
     host: localhost
     port: 8080
     delay: 20
     state: started
 
-- name: Create User
+- name: create User
   shell: echo 'hpsr=new hudson.security.HudsonPrivateSecurityRealm(false); hpsr.createAccount("{{ jenkinscredentials.username }}", "{{ jenkinscredentials.password }}")' | java -jar /var/lib/jenkins/jenkins-cli.jar -s http://{{ jenkins.hostname }}:8080 groovy =
   register: create_result
 
 - debug:
     var: create_result
 
-- name: Copy URL Configuration file
+- name: copy URL Configuration File
   copy:
     src: jenkins.model.JenkinsLocationConfiguration.xml
     dest: /var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml
@@ -32,34 +32,34 @@
     group: jenkins
     mode: "u=rw,g=r,o=r"
 
-- name: Create root URL for Jenkins
+- name: create root URL for Jenkins
   xml:
     path: /var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml
     xpath: /jenkins.model.JenkinsLocationConfiguration/jenkinsUrl
     value: 'http://{{ jenkins.hostname }}:8080/'
 
-- name: change authorization strategy class
+- name: change Authorization Strategy Class
   xml:
     path: /var/lib/jenkins/config.xml
     xpath: /hudson/authorizationStrategy
     attribute: class
     value: hudson.security.FullControlOnceLoggedInAuthorizationStrategy
 
-- name: add child to authorization strategy
+- name: add Child to Authorization Strategy
   xml:
     path: /var/lib/jenkins/config.xml
     xpath: /hudson/authorizationStrategy
     add_children:
     - denyAnonymousReadAccess: 'false'
 
-- name: change security realm class
+- name: change Security Realm Class
   xml:
     path: /var/lib/jenkins/config.xml
     xpath: /hudson/securityRealm
     attribute: class
     value: hudson.security.HudsonPrivateSecurityRealm
 
-- name: add children to security realm
+- name: add Children to Security Realm
   xml:
     path: /var/lib/jenkins/config.xml
     xpath: /hudson/securityRealm
@@ -67,24 +67,24 @@
     - disableSignup: 'false'
     - enableCaptcha: 'false'
 
-- name: Change install state name
+- name: change Install State of Jenkins
   xml:
     path: /var/lib/jenkins/config.xml
     xpath: /hudson/installStateName
     value: 'RUNNING'
 
-- name: Disable executors on Master
+- name: disable executors on Master
   xml:
     path: /var/lib/jenkins/config.xml
     xpath: /hudson/numExecutors
     value: '0'
 
-- name: Restart Jenkins
+- name: restart Jenkins
   service:
     name: jenkins 
     state: restarted
 
-- name: Wait for Jenkinsmaster to get back online
+- name: wait for Jenkinsmaster to get back online
   wait_for:
     host: localhost
     port: 8080

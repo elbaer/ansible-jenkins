@@ -1,33 +1,33 @@
 ---
 
-- name: Install stable RH Jenkins Repo
+- name: install stable RH Jenkins Repo
   get_url:
     url: https://pkg.jenkins.io/redhat-stable/jenkins.repo 
     dest: /etc/yum.repos.d/jenkins.repo
 
-- name: check jenkins rpm key
+- name: check Jenkins rpm Key
   rpm_key:
     state: present
     key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
 
-- name: Install Jenkins
+- name: install Jenkins
   yum:
     name=jenkins
     state=present
 
-- name: Start Jenkins
+- name: start Jenkins
   service:
     name: jenkins
     state: started
 
-- name: Wait for Jenkinsmaster to get back online
+- name: wait for Jenkinsmaster to get back online
   wait_for:
     host: localhost
     port: 8080
     delay: 30
     state: started
 
-- name: Download jenkins Cli 
+- name: download Kenkins cli 
   get_url:
     url: http://{{ jenkins.hostname }}:8080/jnlpJars/jenkins-cli.jar
     dest: /var/lib/jenkins/jenkins-cli.jar

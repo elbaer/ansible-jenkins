@@ -12,22 +12,22 @@
     - jenkins
     - vagrant
 
-- name: Upgrade all Packages
+- name: upgrade all Packages
   yum:
     name: '*'
     state: latest
 
-- name: Install Docker
+- name: install Docker
   package:
     name: docker
     state: present
 
-- name: Restart Docker
+- name: restart Docker
   service:
     name: docker
     state: restarted
 
-- name: Docker is started and enabled
+- name: check Docker is started and enabled
   service:
     name: docker
     state: started

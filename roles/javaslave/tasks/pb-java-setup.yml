@@ -1,11 +1,11 @@
 ---
 
-- name: upgrade all packages
+- name: upgrade all Packages
   yum:
     name: '*'
     state: latest
 
-- name: install maven(git)
+- name: install Maven(git)
   yum:
     name:
       - git

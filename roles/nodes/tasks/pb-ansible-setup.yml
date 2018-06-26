@@ -1,43 +1,43 @@
 ---
 
 - block:
-  - name: 1.Check if EPEL repo is already configured.
+  - name: check if EPEL Repo is already configured
     stat: path={{ nodes.epel_repofile_path }}
     register: epel_repofile_result
 
-  - name: 2.Install EPEL repo.
+  - name: install EPEL repo
     yum:
       name: "{{ nodes.epel_repo_url }}"
       state: present
     register: result
     when: not epel_repofile_result.stat.exists
 
-  - name: 3.Import EPEL GPG key.
+  - name: import EPEL GPG Key
     rpm_key:
       key: "{{ nodes.epel_repo_gpg_key_url }}"
       state: present
     when: not epel_repofile_result.stat.exists
 
-  - name: install modules
+  - name: install Modules
     yum: name={{ item }} state=installed
     loop: "{{ nodes.plugins }}"
 
-- name: ensure ssh password authentication is ok
+- name: ensure ssh Password Authentication is ok
   lineinfile:
     path: /etc/ssh/sshd_config
     regexp: 'PasswordAuthentication '
     line: 'PasswordAuthentication yes'
   notify: restart sshd
 
-- name: ensure passlib python lib is installed
+- name: ensure passlib Python lib is installed
   pip: name=passlib
 
-- name: hash password
+- name: hash Password
   shell: python -c "from passlib.hash import sha512_crypt; print sha512_crypt.encrypt('{{ ansiblecredentials.password }}')"
   register: hashed_pw
   changed_when: false
 
-- name: install ansible user
+- name: install Ansible User
   user:
     name: "{{ ansiblecredentials.username }}"
     state: present
@@ -45,7 +45,7 @@
     password: "{{ hashed_pw.stdout }}"
     groups: vagrant
 
-- name: create sudo rules for ansible user
+- name: create sudo Rules for Ansible User
   copy:
     content: "{{ ansiblecredentials.username }} ALL=(ALL:ALL) NOPASSWD:ALL"
     dest: /etc/sudoers.d/10_{{ ansiblecredentials.username }}
@@ -54,7 +54,7 @@
     mode: 0644
 
 - block:
-  - name: enable public key authentication
+  - name: enable Public Key Authentication
     lineinfile:
         path: /etc/ssh/sshd_config
         regexp: '^#PubkeyAuthentication'
@@ -68,7 +68,7 @@
         insertbefore: '^PubkeyAuthentication'
     notify: restart sshd
 
-- name: update etc hosts
+- name: update /etc/hosts
   blockinfile:
     path: /etc/hosts
     insertafter: EOF
@@ -78,7 +78,7 @@
       192.168.36.12 {{ jenkins.slave2 }}
       192.168.36.13 {{ jenkins.dockerswarm }}
 
-- name: add ansible control node public key
+- name: add Ansible Control Node Public Key
   authorized_key:
     user: "{{ ansiblecredentials.username }}"
     state: present
