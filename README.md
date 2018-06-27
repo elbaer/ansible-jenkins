@@ -35,6 +35,8 @@ Ansible Vault
 * IPs anhand von inventory/hosts anlegen (dynamische Zuweisung)
 * <https://stackoverflow.com/questions/48386717/ansible-slurp-as-private-key-in-jenkins-credential-api-error-for-json-parsing>
 
+https://www.greenreedtech.com/creating-jenkins-credentials-via-the-rest-api/
+
 ## Links
 
 Slaves hinzufügen
