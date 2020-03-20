@@ -2,6 +2,7 @@
 
 ## Jenkins Plugins
 
+Testme
 Um die Jenkins Plugins richtig auszuwählen, musste ich wissen, wie die selbigen heissen. Der Link hier
 <https://updates.jenkins.io/download/plugins/> war extrem hilfreich. Die Pluginnamen entsprechen den Ordnernamen.
 
