@@ -27,7 +27,7 @@
     delay: 30
     state: started
 
-- name: download Kenkins cli 
+- name: download Jenkins cli 
   get_url:
     url: http://{{ jenkins.hostname }}:8080/jnlpJars/jenkins-cli.jar
     dest: /var/lib/jenkins/jenkins-cli.jar
